@@ -28,6 +28,7 @@ public void settings() {
 void setup(){
   
   cp5 = new ControlP5(this);
+  textAlign(LEFT,CENTER);
   
   original = loadImage("plants.png");
   poster = loadImage("poster.png");
@@ -53,32 +54,37 @@ void setup(){
   Stage mainView = new MainView();
   stages.add(mainView);
   
-  pickFirstLayerColors = new Stage0();
-  stages.add(pickFirstLayerColors);
+  //Stage posterImage = new Stage1();
+  //stages.add(posterImage);
   
-  Stage posterImage = new Stage1();
-  stages.add(posterImage);
-  
-  Stage posterImage2 = new Stage2();
-  stages.add(posterImage2);
+  //Stage posterImage2 = new Stage2();
+  //stages.add(posterImage2);
   
   currentStageIndex = 0;
   stages.get(0).onShow();
-  
-  addStageButtons(stages);
 }
 
 void draw() {
   pushMatrix();
-  translate(50, 0);
   stages.get(currentStageIndex).draw();
   popMatrix();
   
+  //colorMode(HSB, 255);
+  //for (int i = 0; i < 255; i++) {
+  //  fill(color(i, 255, 255));
+  //  noStroke();
+  //  rect(i*3, 0, 3, 30);
+  //}
+  //colorMode(RGB, 255);
   readMouseHover();
 }
 
+void mouseDragged() {
+  stages.get(currentStageIndex).onMouseDragged();
+}
+
 void mouseClicked() {
-  stages.get(currentStageIndex).onMouseClick();
+  stages.get(currentStageIndex).onMouseClicked();
 }
 
 void mousePressed() {
@@ -86,7 +92,7 @@ void mousePressed() {
 }
 
 void mouseReleased() {
-  stages.get(currentStageIndex).onMouseReleased();
+  stages.get(currentStageIndex).onMouseReleased(); //<>// //<>//
 }
 
 void keyPressed() {
@@ -138,8 +144,13 @@ public void makePoster() {
 }
 
 public void readMouseHover() {
-  int size = (int) (width/64.0);
+  int size = 10;
   mouseHover = get(mouseX - size, mouseY - size, size*2, size*2);
+  //color c = get(mouseX, mouseY);
+  
+  ////colorMode(HSB, 255);
+  ////println(getWarmth(c) + ", rgb: " + red(c) + ", " + green(c) + ", " + blue(c) + ", hue: " + hue(c));
+  ////colorMode(RGB, 255);
 }
 
 public void savePickedColors() {

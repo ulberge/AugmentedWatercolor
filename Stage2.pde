@@ -68,7 +68,4 @@ public class Stage2 extends Stage {
     lightSlider.hide();
     darkSlider.hide();
   }
-  
-  public void onMouseClick() {}
-  public void onKeyPressed() {}
 }

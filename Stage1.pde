@@ -99,7 +99,7 @@ public class Stage1 extends Stage {
     //workspaceView.currentView = original;
   }
   
-  public void onMouseClick() {
+  public void onMouseClicked() {
     boolean isPickedColor = false;
     color selectedColor = get(mouseX, mouseY);
     for(int i = pickedColors.size() - 1; i >= 0; i--) {

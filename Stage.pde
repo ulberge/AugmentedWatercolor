@@ -3,7 +3,8 @@ public abstract class Stage {
   public abstract void draw();
   public void onShow() {};
   public void onHide() {};
-  public void onMouseClick() {};
+  public void onMouseClicked() {};
+  public void onMouseDragged() {};
   public void onMousePressed() {};
   public void onMouseReleased() {};
   public void onKeyPressed() {};

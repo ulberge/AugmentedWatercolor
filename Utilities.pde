@@ -19,49 +19,78 @@
 // int getBrightness(color c)
 // void printColor(color c)
 
-public static enum FilterOption {
-  VALUE, TEMPERATURE
-};
-
-public class Filter {
+public PImage temperatureFilter(PImage imageToProcess) {
+  PImage processed = imageToProcess.copy();
+  processed.loadPixels();
   
-  public FilterOption filterOption;
-  public PImage filterIcon, filterIconShade;
-  public Button filterButton;
-  public PVector location;
-  
-  public Filter(String iconFile, PVector location, int id) {
-    filterIcon = loadImage("imgs/" + iconFile + ".png");
-    filterIconShade = loadImage("imgs/" + iconFile + "_shade.png");
-    this.location = location;
-    
-    PImage[] imgs = {filterIcon, filterIconShade, filterIconShade};
-    
-    filterButton = cp5.addButton("filter"+id)
-       .setValue(0)
-       .setCaptionLabel("")
-       .setImages(imgs)
-       .setPosition(location.x,location.y)
-       .setSize(20,20)
-       ;
-  }
-  
-  public PImage apply(PImage inputImage) {
-    
-    switch (filterOption) {
-      case VALUE:  
-        println("value");
-        break;
-      case TEMPERATURE:  
-        println("temp");
-        break;
+  for (int y = 0; y < processed.height; y++) {
+    for (int x = 0; x < processed.width; x++) {
+      color c = getPixel(processed, x, y);
+      float b = getBrightness(c)/255.0;
+      float w = getWarmth(c);
+      
+      color toShow = 0;
+      if (w > 0.5) {
+        toShow = color((0.75*red(c))+(64*w), 0.75*green(c), 0.75*blue(c));
+      } else {
+        toShow = color(0.75*red(c), 0.75*green(c), (0.75*blue(c))+(64*(1-w)));
+      }
+      
+      setPixel(processed, x, y, toShow);
     }
-    
-    return inputImage;
   }
   
+  return processed;
+}
+
+// get warmth on scale from 0.0-1.0
+public float getWarmth(color c) {
+  //colorMode(HSB, 100);
+  // 0-80 and 330-360
+  // 0-22, 92-100
+  // warmest == 7 == 1.0
+  // coldest == 62 == 0.0
+  // 22 = 0.5
+  // 92 = 0.5
+  float h = 2*PI*((hue(c)-80)/255.0);
+  float s = saturation(c)/255.0;
+  //float h = 2*PI*(hue(c)/255.0);
+  //colorMode(RGB, 255);
+  //return 0.5 + (0.5*sin(h));
+  return 0.5 + s*(-0.5*sin(h));
+}
+
+public PImage valueFilter(PImage imageToProcess, ArrayList<Integer> thresholds) {
+  PImage processed = imageToProcess.copy();
   
+  if (thresholds.size() < 1) {
+    return processed;
+  }
   
+  int valueSegment = (int) 255.0/thresholds.size();
+  
+  processed.loadPixels();
+  for (int y = 0; y < processed.height; y++) {
+    for (int x = 0; x < processed.width; x++) {
+      color c = getPixel(processed, x, y);
+      int b = getBrightness(c);
+      
+      // Default to white
+      color toShow = color(255);
+      
+      // If it is below any threshold, reduce it to the previous threshold
+      for (int i = 1; i < thresholds.size(); i++) {
+        if (b < thresholds.get(i)) {
+          toShow = color((i-1)*valueSegment);
+          break;
+        }
+      }
+        
+      setPixel(processed, x, y, toShow);
+    }
+  }
+  
+  return processed;
 }
 
 PImage selectColor(PImage imageToProcess, color toSelect, int opacityOfRest, boolean showColorDiff, boolean showValueDiff) {

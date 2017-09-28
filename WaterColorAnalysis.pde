@@ -4,20 +4,16 @@ import java.io.*;
 ControlP5 cp5;
 
 PImage original;
-
-Stage pickFirstLayerColors, posterImage;
 int currentStageIndex;
 ArrayList<Stage> stages;
 
-PImage swatch, mouseHover;
-color swatchColor;
-ArrayList<Integer> pickedColors;
-PImage poster;
-int swatchSize, swatchTolerance;
-int lightFilter, darkFilter;
-int darkFilter0, darkFilter02;
-int opacityOfRest;
-boolean colorDiffIsActive, valueDiffIsActive;
+PImage mouseHover;
+
+int swatchSize, swatchTolerance, darkFilter;
+int swatchSize_m, swatchTolerance_m, lightFilter_m, darkFilter_m;
+int swatchSize_d, swatchTolerance_d, lightFilter_d, darkFilter_d;
+
+PosterFilter lightsFilter, mediumsFilter, darksFilter;
 
 WorkspaceView workspaceView;
 
@@ -31,34 +27,19 @@ void setup(){
   textAlign(LEFT,CENTER);
   
   original = loadImage("plants.png");
-  poster = loadImage("poster.png");
   original.resize(400,300);
   
-  workspaceView = new WorkspaceView(poster);
+  lightsFilter = new LightsPosterFilter(new PVector(50, 431), 2);
+  mediumsFilter = new MediumsPosterFilter(new PVector(50, 461), 3);
+  darksFilter = new DarksPosterFilter(new PVector(50, 491), 4);
   
-  loadPickedColors();
-  
-  swatch = null;
+  workspaceView = new WorkspaceView(original);
   mouseHover = null;
-  swatchColor = color(255, 255, 255);
-  swatchSize = 10;
-  swatchTolerance = 30;
-  
-  lightFilter = 90;
-  darkFilter = 68;
-  darkFilter0 = 50;
-  darkFilter02 = 50;
   
   stages = new ArrayList<Stage>();
   
   Stage mainView = new MainView();
   stages.add(mainView);
-  
-  //Stage posterImage = new Stage1();
-  //stages.add(posterImage);
-  
-  //Stage posterImage2 = new Stage2();
-  //stages.add(posterImage2);
   
   currentStageIndex = 0;
   stages.get(0).onShow();
@@ -68,14 +49,7 @@ void draw() {
   pushMatrix();
   stages.get(currentStageIndex).draw();
   popMatrix();
-  
-  //colorMode(HSB, 255);
-  //for (int i = 0; i < 255; i++) {
-  //  fill(color(i, 255, 255));
-  //  noStroke();
-  //  rect(i*3, 0, 3, 30);
-  //}
-  //colorMode(RGB, 255);
+
   readMouseHover();
 }
 
@@ -106,25 +80,6 @@ void keyPressed() {
   }
 }
 
-void addStageButtons(ArrayList<Stage> stages) {
-  PFont pfont = createFont("Arial",20,true); // use true/false for smooth/no-smooth
-  ControlFont font = new ControlFont(pfont,24);
-  
-  Button previous = cp5.addButton("previousStage")
-     .setPosition(0, 0)
-     .setCaptionLabel("←")
-     .setSize((int) 50,height)
-     .setFont(font)
-     ;
-     
-  Button next = cp5.addButton("nextStage")
-     .setCaptionLabel("→")
-     .setPosition((int) (0.95*width), 0)
-     .setSize((int) 50,height)
-     .setFont(font)
-     ;
-}
-
 public void previousStage() {
   stages.get(currentStageIndex).onHide();
   currentStageIndex = max(currentStageIndex-1, 0);
@@ -138,9 +93,15 @@ public void nextStage() {
 }
 
 public void makePoster() {
-  poster = getPoster(original, pickedColors, darkFilter0);
-  poster.save("poster.png");
-  setWorkspaceViewImage(poster);
+  lightsFilter.makePoster();  
+}
+
+public void makePoster_m() {
+  mediumsFilter.makePoster();  
+}
+
+public void makePoster_d() {
+  darksFilter.makePoster();  
 }
 
 public void readMouseHover() {
@@ -151,32 +112,6 @@ public void readMouseHover() {
   ////colorMode(HSB, 255);
   ////println(getWarmth(c) + ", rgb: " + red(c) + ", " + green(c) + ", " + blue(c) + ", hue: " + hue(c));
   ////colorMode(RGB, 255);
-}
-
-public void savePickedColors() {
-  try {
-      // serialise an object to disc..
-    FileOutputStream f=new FileOutputStream("pickedColors.ser");
-    ObjectOutputStream o=new ObjectOutputStream(f);
-    o.writeObject(pickedColors);
-    o.close();
-  } catch (Exception e) { // The object "e" is the exception object that was thrown.
-      // this is where you handle it if an error occurs
-      println(e);
-  }
-}
-
-public void loadPickedColors() {
-  // read it back in
-  try {
-    FileInputStream f=new FileInputStream("pickedColors.ser");
-    ObjectInputStream o=new ObjectInputStream(f);
-    pickedColors =(ArrayList<Integer>) o.readObject();
-    o.close(); 
-  } catch (Exception e) {
-    println(e);
-    pickedColors = new ArrayList<Integer>();
-  }  
 }
 
 public void setWorkspaceViewImage(PImage newView) {

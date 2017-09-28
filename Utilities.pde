@@ -282,7 +282,7 @@ int getBrightness(color c) {
 }
 
 // Given an image, return a version of that image with every pixel mapped to the closest color from the supplied pallette
-PImage getPoster(PImage original, ArrayList<Integer> colors, int darkLimit) {
+PImage getPoster(PImage original, ArrayList<Integer> colors, int lightLimit, int darkLimit) {
   if (original == null || colors == null || colors.size() <= 0) {
     return null;
   }
@@ -301,7 +301,8 @@ PImage getPoster(PImage original, ArrayList<Integer> colors, int darkLimit) {
       color c = getPixel(poster, x, y);
       
       // remove really dark areas, doesn't matter what is below
-      if (getBrightness(c) < darkLimit) {
+      int b = getBrightness(c);
+      if (b < darkLimit || b > lightLimit) {
         //setPixel(poster, x, y, color(255));
         continue;
       }

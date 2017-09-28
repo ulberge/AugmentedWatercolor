@@ -20,7 +20,9 @@ public class MainView extends Stage {
     filters = new ArrayList<CustomFilter>();
     filters.add(new ValueFilter(new PVector(50, 371), 0));
     filters.add(new TemperatureFilter(new PVector(50, 401), 1));
-    filters.add(new LightsPosterFilter(new PVector(50, 431), 2));
+    filters.add(lightsFilter);
+    filters.add(mediumsFilter);
+    filters.add(darksFilter);
     
     layers = new ArrayList<Layer>();
     for (int i = 0; i < 5; i++) {
@@ -131,35 +133,41 @@ public class MainView extends Stage {
     // Check custom buttons
     removeLayerIfClicked();
     addAndSelectFilterIfClicked();
+    updateCurrentView();
   }
   
   private void addAndSelectFilterIfClicked() {
     for (CustomFilter f : filters) {
       if (f.button.isMouseOver()) {
-        if (activeFilter != null) {
-          activeFilter.hideEditPanel();
-        }
-        
-        boolean isAdd = true;
-        Layer firstEmpty = null;
-        for (Layer l : layers) {
-          if (l.filter == null && firstEmpty == null) {
-            firstEmpty = l;
-          } else if (l.filter == f) {
-            isAdd = false;
-            break;
-          }
-        }
-        
-        if (isAdd) {
-          if (firstEmpty != null) {
-            firstEmpty.setFilter(f);
-          }
-        }
-        f.showEditPanel();
-        activeFilter = f;
+        addAndSelectFilter(f);
       }
     }
+  }
+  
+  private void addAndSelectFilter(CustomFilter f) {
+    if (activeFilter != null) {
+      activeFilter.hideEditPanel();
+    }
+    
+    if (f instanceof PosterFilter) {
+      // if poster filter, clear and add
+      for (Layer l : layers) {
+        l.filter = null;
+      }
+      layers.get(0).setFilter(f);
+    } else {
+      // else, append
+      for (Layer l : layers) {
+        if (l.filter == null) {
+          l.setFilter(f);
+          break;
+        }
+      }
+    }
+    
+    f.showEditPanel();
+    activeFilter = f;
+    
     updateCurrentView();
   }
   

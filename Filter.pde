@@ -1,5 +1,5 @@
 public enum FilterPrototype {
-  VALUE("value_study"), TEMPERATURE("warm_cool"), POSTER("lights_poster");
+  VALUE("value_study"), TEMPERATURE("warm_cool"), LIGHTS_POSTER("lights_poster"), MEDIUMS_POSTER("mediums_poster"), DARKS_POSTER("darks_poster");
   
   public final String iconFile;
   FilterPrototype(String iconFile) {

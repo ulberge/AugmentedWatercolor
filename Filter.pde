@@ -67,7 +67,11 @@ public class ValueFilter extends Filter {
     for (Slider s : thresholdSliders) {
       thresholds.add(Math.round(s.getValue()));
     }
-    pg.image(compressValueFilter(pg, thresholds), 0, 0);
+    
+    PImage compressed = compressValueFilter(original, thresholds);
+    PImage transpg = removeWhite(compressed);
+    PImage adjtranspg = transparencyFilter(transpg, opacity);
+    pg.image(adjtranspg, 0, 0);
   }
   
   public void showEditPanel() {

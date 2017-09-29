@@ -4,20 +4,17 @@ public class MainView extends Stage {
   
   PImage currentView;
   int layerSquareSize = 20;
-  ArrayList<CustomFilter> filters;
+  ArrayList<Filter> filters;
   ArrayList<Layer> layers;
-  CustomFilter draggingFilter;
-  PVector draggingOffset;
-  CustomFilter activeFilter;
-  
-  FilterType valueFilter, temperatureFilter;
+  ArrayList<Slider> layerSliders;
+  Filter activeFilter;
+  Slider layer0Slider, layer1Slider, layer2Slider, layer3Slider, layer4Slider;
   
   public MainView() {
-    currentView = original;
-    draggingFilter = null;
+    currentView = null;
     activeFilter = null;
     
-    filters = new ArrayList<CustomFilter>();
+    filters = new ArrayList<Filter>();
     filters.add(new ValueFilter(new PVector(50, 371), 0));
     filters.add(new TemperatureFilter(new PVector(50, 401), 1));
     filters.add(lightsFilter);
@@ -28,13 +25,17 @@ public class MainView extends Stage {
     for (int i = 0; i < 5; i++) {
       layers.add(new Layer(new PVector(450, 56+(layerSquareSize*i*1.5)), i));
     }
+    
+    addSliders();
   }
   
   public void draw() {
     background(255);
     
     // preview
-    image(currentView, 0, 0, 400, 300);
+    if (currentView != null) {
+      image(currentView, 0, 0, 400, 300);
+    }
     
     // drag and drop layers area
     pushMatrix();
@@ -62,14 +63,6 @@ public class MainView extends Stage {
       translate(0, layerSquareSize*1.5);
     }
     popMatrix();
-  
-    if (draggingFilter != null) {
-      pushMatrix();
-      tint(255, 100);
-      image(draggingFilter.filterType.filterIcon, mouseX-draggingOffset.x, mouseY-draggingOffset.y, layerSquareSize, layerSquareSize);
-      tint(255, 255);
-      popMatrix();
-    }
     
     // edit layer area
     if (activeFilter != null) {
@@ -84,45 +77,11 @@ public class MainView extends Stage {
       
       activeFilter.drawEditPanel();
     }
-    
-    // create poster layer
-    // create default layer
   }
   
   public void onMouseDragged() {
     updateCurrentView();
   }
-  
-  //public void onMousePressed() {
-  //  if (draggingFilter == null) {
-  //    for (CustomFilter f : filters) {
-  //      if (f.button.isMouseOver()) {
-  //        draggingFilter = f;
-  //        draggingOffset = new PVector(mouseX - f.location.x, mouseY - f.location.y);
-          
-  //        if (activeFilter != null) {
-  //          activeFilter.hideEditPanel();
-  //        }
-  //        f.showEditPanel();
-  //        activeFilter = f;
-  //        break;
-  //      }
-  //    }
-  //  }
-  //}
-  
-  //public void onMouseReleased() {
-  //  if (draggingFilter != null) {
-  //    for (Layer l : layers) {
-  //      if (isMouseOverLocation(l.location, new PVector(layerSquareSize, layerSquareSize))) {
-  //        l.setFilter(draggingFilter);
-  //        updateCurrentView();
-  //        break;
-  //      }
-  //    }
-  //  }
-  //  draggingFilter = null;
-  //}
   
   public void onMouseClicked() {
     // Pass events to subview
@@ -137,31 +96,25 @@ public class MainView extends Stage {
   }
   
   private void addAndSelectFilterIfClicked() {
-    for (CustomFilter f : filters) {
+    for (Filter f : filters) {
       if (f.button.isMouseOver()) {
         addAndSelectFilter(f);
       }
     }
   }
   
-  private void addAndSelectFilter(CustomFilter f) {
+  private void addAndSelectFilter(Filter f) {
     if (activeFilter != null) {
       activeFilter.hideEditPanel();
     }
     
-    if (f instanceof PosterFilter) {
-      // if poster filter, clear and add
-      for (Layer l : layers) {
-        l.filter = null;
+    for (Layer l : layers) {
+      if (l.filter == f) {
+        break;  
       }
-      layers.get(0).setFilter(f);
-    } else {
-      // else, append
-      for (Layer l : layers) {
-        if (l.filter == null) {
-          l.setFilter(f);
-          break;
-        }
+      if (l.filter == null) {
+        l.setFilter(f);
+        break;
       }
     }
     
@@ -198,21 +151,38 @@ public class MainView extends Stage {
   }
   
   public void updateCurrentView() {
-    PImage newView = original.copy();
+    //PImage newView = createImage(400, 300, RGB);//getEmptyImage();
+    PGraphics pg = createGraphics(400, 300);
+    pg.beginDraw();
     for (int i = 0; i < layers.size(); i++) {
       Layer l = layers.get(i);
       if (l.filter != null) {
-        newView = l.filter.apply(newView);
+        float opacity = layerSliders.get(i).getValue();
+        l.filter.apply(pg, opacity);
       }
     }
     
-    currentView = newView;
+    pg.endDraw();
+    currentView = pg;
     setWorkspaceViewImage(currentView);
   }
   
+  public PImage getEmptyImage() {
+    PImage img = createImage(400, 300, RGB);
+    img.loadPixels();
+    for (int i = 0; i < img.pixels.length; i++) {
+      img.pixels[i] = color(255, 255, 255); 
+    }
+    img.updatePixels();  
+    return img;
+  }
+  
   public void onShow() {
-    for (CustomFilter f : filters) {
+    for (Filter f : filters) {
       f.button.show();
+    }
+    for (Slider s : layerSliders) {
+      s.show();
     }
     setWorkspaceViewImage(currentView);
   }
@@ -221,8 +191,74 @@ public class MainView extends Stage {
     for (Layer l : layers) {
       l.button.hide();
     }
-    for (CustomFilter f : filters) {
+    for (Filter f : filters) {
       f.button.hide();
     }
+    for (Slider s : layerSliders) {
+      s.hide();
+    }
+  }
+  
+  private void addSliders() {
+    layerSliders = new ArrayList<Slider>();
+    layer0Slider = cp5.addSlider("layer0Opacity")
+     .setPosition(490, 56)
+     .setSize(100,20)
+     .setRange(1,255)
+     .setCaptionLabel("")
+     .setNumberOfTickMarks(100)
+     ;
+    layer0Slider.getValueLabel().align(ControlP5.LEFT, ControlP5.BOTTOM_OUTSIDE).setPaddingX(0);
+    layer0Slider.getCaptionLabel().align(ControlP5.RIGHT, ControlP5.BOTTOM_OUTSIDE).setPaddingX(0);
+    layer0Slider.hide(); 
+    layerSliders.add(layer0Slider);
+    
+    layer1Slider = cp5.addSlider("layer1Opacity")
+     .setPosition(490, 86)
+     .setSize(100,20)
+     .setRange(1,255)
+     .setCaptionLabel("")
+     .setNumberOfTickMarks(100)
+     ;
+    layer1Slider.getValueLabel().align(ControlP5.LEFT, ControlP5.BOTTOM_OUTSIDE).setPaddingX(0);
+    layer1Slider.getCaptionLabel().align(ControlP5.RIGHT, ControlP5.BOTTOM_OUTSIDE).setPaddingX(0);
+    layer1Slider.hide(); 
+    layerSliders.add(layer1Slider); 
+    
+    layer2Slider = cp5.addSlider("layer2Opacity")
+     .setPosition(490, 116)
+     .setSize(100,20)
+     .setRange(1,255)
+     .setCaptionLabel("")
+     .setNumberOfTickMarks(100)
+     ;
+    layer2Slider.getValueLabel().align(ControlP5.LEFT, ControlP5.BOTTOM_OUTSIDE).setPaddingX(0);
+    layer2Slider.getCaptionLabel().align(ControlP5.RIGHT, ControlP5.BOTTOM_OUTSIDE).setPaddingX(0);
+    layer2Slider.hide();  
+    layerSliders.add(layer2Slider);
+    
+    layer3Slider = cp5.addSlider("layer3Opacity")
+     .setPosition(490, 146)
+     .setSize(100,20)
+     .setRange(1,255)
+     .setCaptionLabel("")
+     .setNumberOfTickMarks(100)
+     ;
+    layer3Slider.getValueLabel().align(ControlP5.LEFT, ControlP5.BOTTOM_OUTSIDE).setPaddingX(0);
+    layer3Slider.getCaptionLabel().align(ControlP5.RIGHT, ControlP5.BOTTOM_OUTSIDE).setPaddingX(0);
+    layer3Slider.hide();  
+    layerSliders.add(layer3Slider);
+    
+    layer4Slider = cp5.addSlider("layer4Opacity")
+     .setPosition(490, 176)
+     .setSize(100,20)
+     .setRange(1,255)
+     .setCaptionLabel("")
+     .setNumberOfTickMarks(100)
+     ;
+    layer4Slider.getValueLabel().align(ControlP5.LEFT, ControlP5.BOTTOM_OUTSIDE).setPaddingX(0);
+    layer4Slider.getCaptionLabel().align(ControlP5.RIGHT, ControlP5.BOTTOM_OUTSIDE).setPaddingX(0);
+    layer4Slider.hide();  
+    layerSliders.add(layer4Slider);
   }
 }

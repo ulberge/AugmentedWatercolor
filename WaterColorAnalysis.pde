@@ -13,6 +13,8 @@ int swatchSize, swatchTolerance, darkFilter;
 int swatchSize_m, swatchTolerance_m, lightFilter_m, darkFilter_m;
 int swatchSize_d, swatchTolerance_d, lightFilter_d, darkFilter_d;
 
+int layer0Opacity, layer1Opacity, layer2Opacity, layer3Opacity, layer4Opacity;
+
 PosterFilter lightsFilter, mediumsFilter, darksFilter;
 
 WorkspaceView workspaceView;
@@ -28,6 +30,12 @@ void setup(){
   
   original = loadImage("plants.png");
   original.resize(400,300);
+  
+  layer0Opacity = 100;
+  layer1Opacity = 100;
+  layer2Opacity = 100;
+  layer3Opacity = 100;
+  layer4Opacity = 100;
   
   lightsFilter = new LightsPosterFilter(new PVector(50, 431), 2);
   mediumsFilter = new MediumsPosterFilter(new PVector(50, 461), 3);
@@ -116,4 +124,15 @@ public void readMouseHover() {
 
 public void setWorkspaceViewImage(PImage newView) {
   workspaceView.currentView = newView;
+}
+
+public abstract class Stage {
+  public abstract void draw();
+  public void onShow() {};
+  public void onHide() {};
+  public void onMouseClicked() {};
+  public void onMouseDragged() {};
+  public void onMousePressed() {};
+  public void onMouseReleased() {};
+  public void onKeyPressed() {};
 }

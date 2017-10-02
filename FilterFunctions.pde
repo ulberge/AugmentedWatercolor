@@ -83,12 +83,6 @@ PImage posterFilter(PImage original, ArrayList<Integer> colors, int lightLimit, 
   PImage poster = original.copy();
   poster.loadPixels();
   
-  ArrayList<PVector> pickedColorVectors = new ArrayList<PVector>();
-  for (color pickedColor : colors) {
-    PVector colorVector = getColorVector(pickedColor);
-    pickedColorVectors.add(colorVector);
-  }
-  
   for (int y = 0; y < poster.height; y++) {
     for (int x = 0; x < poster.width; x++) {
       color c = getPixel(poster, x, y);
@@ -100,35 +94,10 @@ PImage posterFilter(PImage original, ArrayList<Integer> colors, int lightLimit, 
         continue;
       }
       
-      PVector colorVector = getColorVector(c);
-      
-      int closestMatchIndex = 0;
-      float minAngle = 90;
-      float minDistance = 1000;
-      float minAngleAndDistanceAverage = 10000;
-      float distanceWeight = 0.00001;
-      for (int i = 0; i < pickedColorVectors.size(); i++) {
-        PVector pickedColorVector = pickedColorVectors.get(i);
-        float angleBetween = abs(PVector.angleBetween(colorVector, pickedColorVector));
-        float distanceBetween = PVector.dist(colorVector, pickedColorVector);
-        float angleAndDistanceAverage = sq(sqrt(angleBetween) + sqrt(distanceBetween*distanceWeight));
-        
-        //if (angleBetween < minAngle) {
-        //  minAngle = angleBetween;
-        //  closestMatchIndex = i;
-        //}
-        //if (distanceBetween < minDistance) {
-        //  minDistance = distanceBetween;
-        //  closestMatchIndex = i;
-        //}
-        if (angleAndDistanceAverage < minAngleAndDistanceAverage) {
-          minAngleAndDistanceAverage = angleAndDistanceAverage;
-          closestMatchIndex = i;
-        }
-      }
+      int matchIndex = getClosestColorIndex(c, colors);
       
       // Set pixel to closest color profile
-      setPixel(poster, x, y, colors.get(closestMatchIndex));
+      setPixel(poster, x, y, colors.get(matchIndex));
     }
   }
   

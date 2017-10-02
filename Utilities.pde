@@ -132,3 +132,24 @@ color getSwatchColor(PImage swatch, int tolerance) {
   areaToAverage.updatePixels();
   return c;
 }
+
+public int getClosestColorIndex(color c, ArrayList<Integer> colorsToMatch) {
+  colorMode(HSB, 255);
+  float h = hue(c);
+  float s = saturation(c);
+  float minDiff = 999999999;
+  int match = color(0);
+  for (int i = 0; i < colorsToMatch.size(); i++) {
+    int colorToMatch = colorsToMatch.get(i);
+    float hueDiff = abs(h - hue(colorToMatch));
+    float saturationDiff = abs(s - saturation(colorToMatch));
+    float totalDiff = (s*hueDiff)+((255-s)*saturationDiff);
+    if (totalDiff < minDiff) {
+      minDiff = totalDiff;
+      match = i;
+    }
+  } 
+  
+  colorMode(RGB, 255);
+  return match;
+}

@@ -34,8 +34,10 @@ public class MainView extends Stage {
     
     // preview
     if (currentView != null) {
-      image(currentView, 0, 0, 400, 300);
+      image(currentView, 20, 0, 400, 300);
     }
+    
+    image(original, 680, 0, 400, 300);
     
     // drag and drop layers area
     pushMatrix();

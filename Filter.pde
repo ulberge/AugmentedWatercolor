@@ -189,12 +189,12 @@ abstract public class PosterFilter extends Filter {
     }
   }
   
-  protected void readSwatch() {
+  protected void readSwatch(int swatchSize, int swatchTolerance) {
     swatch = mouseHover.get((int) (10-(swatchSize*0.5)), (int) (10-(swatchSize*0.5)), swatchSize, swatchSize);
     swatchColor = getSwatchColor(swatch, swatchTolerance);
   }
   
-  protected void drawSwatchSelection() {
+  protected void drawSwatchSelection(int swatchSize) {
     if (swatch != null) {
       if (mouseHover != null) {
         image(mouseHover, 0, 0, 100, 100);
@@ -327,7 +327,7 @@ public class DarksPosterFilter extends PosterFilter {
     
     pushMatrix();
     translate(260, 30);
-    drawSwatchSelection();
+    drawSwatchSelection(swatchSize_d);
     popMatrix();
     
     pushMatrix();
@@ -337,7 +337,7 @@ public class DarksPosterFilter extends PosterFilter {
     
     popMatrix();
     
-    readSwatch();
+    readSwatch(swatchSize_d, swatchTolerance_d);
   }
   
   public void showEditPanel() {
@@ -448,7 +448,7 @@ public class LightsPosterFilter extends PosterFilter {
     
     pushMatrix();
     translate(260, 30);
-    drawSwatchSelection();
+    drawSwatchSelection(swatchSize);
     popMatrix();
     
     pushMatrix();
@@ -458,7 +458,7 @@ public class LightsPosterFilter extends PosterFilter {
     
     popMatrix();
     
-    readSwatch();
+    readSwatch(swatchSize, swatchTolerance);
   }
   
   public void showEditPanel() {
@@ -583,7 +583,7 @@ public class MediumsPosterFilter extends PosterFilter {
     
     pushMatrix();
     translate(260, 30);
-    drawSwatchSelection();
+    drawSwatchSelection(swatchSize_m);
     popMatrix();
     
     pushMatrix();
@@ -593,7 +593,7 @@ public class MediumsPosterFilter extends PosterFilter {
     
     popMatrix();
     
-    readSwatch();
+    readSwatch(swatchSize_m, swatchTolerance_m);
   }
   
   public void showEditPanel() {

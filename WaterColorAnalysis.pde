@@ -28,7 +28,7 @@ void setup(){
   cp5 = new ControlP5(this);
   textAlign(LEFT,CENTER);
   
-  original = loadImage("plants.png");
+  original = loadImage("wyeth.jpg");
   original.resize(400,300);
   
   layer0Opacity = 100;
